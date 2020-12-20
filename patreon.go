@@ -31,17 +31,18 @@ func RefreshToken() {
 }
 
 // TODO: https://www.reddit.com/r/golang/comments/2xmnvs/returning_nil_for_a_struct/
-func FetchPatrons() *PatreonMembersResponse {
-	url := fmt.Sprintf("https://www.patreon.com/api/oauth2/v2/campaigns/%s/members", campaignId)
+func FetchPatrons() (PatreonMembersResponse, error) {
+	var response PatreonMembersResponse
 
+	url := fmt.Sprintf("https://www.patreon.com/api/oauth2/v2/campaigns/%s/members", campaignId)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Fatal(err)
-
-		return nil
+		return response, err
 	}
 
 	req.Header.Set("User-Agent", "oengus.io/patreon-fetcher")
+	req.Header.Set("Authorisation", "Bearer TODO")
 
 	res, getErr := httpClient.Do(req)
 	if getErr != nil {
@@ -57,13 +58,11 @@ func FetchPatrons() *PatreonMembersResponse {
 		log.Fatal(readErr)
 	}
 
-	parsedBody := &PatreonMembersResponse{}
-
-	err2 := json.Unmarshal(body, &parsedBody)
+	err2 := json.Unmarshal(body, &response)
 	if err2 != nil {
 		fmt.Println(err2)
-		return nil
+		return response, err2
 	}
 
-	return parsedBody
+	return response, nil
 }
