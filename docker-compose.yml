@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  oengus_patreon:
+    container_name: oengus-patreon
+    build:
+      context: .
+    ports:
+      - "8080:80"
+    network_mode: "bridge"
+    environment:
+      - PATREON_CAMPAIGN_ID=5872382
+      - PATREON_CLIENT_ID=local
+      - PATREON_CLIENT_SECRET=local
