@@ -1,6 +1,6 @@
 package main
 
-/// <editor-fold name="UserOutput">
+//// Output shown to the user
 type PatronDisplay struct {
     Name string `json:"full_name"`
     // assign this somehow (or just do it in frontend?)
@@ -12,17 +12,13 @@ type PatronOutput struct {
     Patrons []PatronDisplay `json:"patrons"`
 }
 
-/// </editor-fold>
-
-/// <editor-fold name="Refresh token response">
+//// Credentials file
 type PatreonTokens struct {
     AccessToken  string `json:"access_token"`
     RefreshToken string `json:"refresh_token"`
 }
 
-/// </editor-fold>
-
-/// <editor-fold name="Patrons response">
+//// Patreon api responses
 type PatreonMembersResponse struct {
     Data []PatreonMembersData `json:"data"`
 }
@@ -50,5 +46,3 @@ type PatreonMembersAttribute struct {
     PatronStatus       string `json:"patron_status"`
     WillPayAmountCents int    `json:"will_pay_amount_cents"`
 }
-
-/// </editor-fold>

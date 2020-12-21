@@ -47,7 +47,7 @@ func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
 
     jsonErr := json.Unmarshal(body, &response)
     if jsonErr != nil {
-        fmt.Println(jsonErr)
+        log.Println(jsonErr)
         return response, jsonErr
     }
 
@@ -90,7 +90,7 @@ func FetchPatrons(tokens PatreonTokens) (PatreonMembersResponse, error) {
 
     jsonErr := json.Unmarshal(body, &response)
     if jsonErr != nil {
-        fmt.Println(jsonErr)
+        log.Println(jsonErr)
         return response, jsonErr
     }
 
