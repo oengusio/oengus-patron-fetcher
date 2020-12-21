@@ -14,6 +14,8 @@ var tokens PatreonTokens
 var patreonCache PatronOutput
 
 func UpdatePatrons() {
+    log.Println("Updating patrons")
+
     patrons, err := FetchPatrons(tokens)
 
     // 401 response, refresh the tokens
@@ -47,6 +49,8 @@ func UpdatePatrons() {
         }
     }
 
+    log.Println("Found", len(newCache.Patrons), "patrons")
+
     patreonCache = newCache
 }
 
@@ -73,18 +77,18 @@ func StartUpdatePatronTimer() {
 }
 
 func LoadPatronCredentials() {
-    // create cache folder
-    if _, err := os.Stat("cache"); os.IsNotExist(err) {
-        os.Mkdir("cache", 0700)
+    // create credentials folder
+    if _, err := os.Stat("credentials"); os.IsNotExist(err) {
+        os.Mkdir("credentials", 0700)
     }
 
-    if _, err := os.Stat("cache/patreon-credentials.json"); os.IsNotExist(err) {
+    if _, err := os.Stat("/storage/oengus-patreon/patreon-credentials.json"); os.IsNotExist(err) {
         // fetch credentials
-        log.Fatal("Failed to load credentials file, please place it in the cache folder")
+        log.Fatal("Failed to load credentials file at \"/storage/oengus-patreon/patreon-credentials.json\"")
     }
 
     // Open our jsonFile
-    jsonFile, err := os.Open("cache/patreon-credentials.json")
+    jsonFile, err := os.Open("/storage/oengus-patreon/patreon-credentials.json")
     // if we os.Open returns an error then handle it
     if err != nil {
         log.Fatal(err)

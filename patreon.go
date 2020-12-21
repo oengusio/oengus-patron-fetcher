@@ -45,8 +45,6 @@ func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
         log.Fatal(readErr)
     }
 
-    log.Println(body)
-
     jsonErr := json.Unmarshal(body, &response)
     if jsonErr != nil {
         log.Println(jsonErr)
@@ -54,7 +52,7 @@ func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
     }
 
     file, _ := json.MarshalIndent(response, "", " ")
-    _ = ioutil.WriteFile("cache/patreon-credentials.json", file, 0644)
+    _ = ioutil.WriteFile("/storage/oengus-patreon/patreon-credentials.json", file, 0644)
 
     return response, nil
 }
@@ -95,8 +93,6 @@ func FetchPatrons(tokens PatreonTokens) (PatreonMembersResponse, error) {
     if readErr != nil {
         log.Fatal(readErr)
     }
-
-    fmt.Println(string(body))
 
     jsonErr := json.Unmarshal(body, &response)
     if jsonErr != nil {

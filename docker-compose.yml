@@ -4,6 +4,8 @@ services:
     container_name: oengus-patreon
     build:
       context: .
+    volumes:
+      - credentials:/storage/oengus-patreon
     ports:
       - "9000:9000"
     network_mode: "bridge"
@@ -11,3 +13,5 @@ services:
       - PATREON_CAMPAIGN_ID=5872382
       - PATREON_CLIENT_ID=local
       - PATREON_CLIENT_SECRET=local
+volumes:
+  credentials:
