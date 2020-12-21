@@ -14,7 +14,40 @@ var tokens PatreonTokens
 var patreonCache PatronOutput
 
 func UpdatePatrons() {
-    log.Println("Fetching patrons!")
+    patrons, err := FetchPatrons(tokens)
+
+    // 401 response, refresh the tokens
+    if err != nil && err.Error() == "StatusUnauthorized" {
+        newTokens, _ := RefreshToken(tokens)
+
+        tokens = newTokens
+
+        patrons, err = FetchPatrons(tokens)
+    }
+
+    if err != nil {
+        log.Println(err)
+        return
+    }
+
+    newCache := PatronOutput{
+        Patrons: make([]PatronDisplay, 0),
+    }
+
+    // for {key}, {value} := range {list}
+    for _, patron := range patrons.Data {
+        attr := patron.Attributes
+
+        // is an active patron that pays $25 or more
+        if attr.PatronStatus == "active_patron" && attr.WillPayAmountCents >= 2500 {
+            newCache.Patrons = append(newCache.Patrons, PatronDisplay{
+                Id: patron.Relationships.User.Data.Id,
+                Name: attr.FullName,
+            })
+        }
+    }
+
+    patreonCache = newCache
 }
 
 func StartUpdatePatronTimer() {
@@ -47,33 +80,31 @@ func LoadPatronCredentials() {
 
     if _, err := os.Stat("cache/patreon-credentials.json"); os.IsNotExist(err) {
         // fetch credentials
-    } else {
-        // Open our jsonFile
-        jsonFile, err := os.Open("cache/patreon-credentials.json")
-        // if we os.Open returns an error then handle it
-        if err != nil {
-            log.Fatal(err)
-        }
-
-        defer jsonFile.Close()
-
-        byteValue, _ := ioutil.ReadAll(jsonFile)
-
-        json.Unmarshal(byteValue, &tokens)
+        log.Fatal("Failed to load credentials file, please place it in the cache folder")
     }
 
-    log.Println(tokens.AccessToken)
+    // Open our jsonFile
+    jsonFile, err := os.Open("cache/patreon-credentials.json")
+    // if we os.Open returns an error then handle it
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer jsonFile.Close()
+
+    byteValue, _ := ioutil.ReadAll(jsonFile)
+
+    json.Unmarshal(byteValue, &tokens)
 }
 
 func InitApp() {
+    // Load the stored tokens
     LoadPatronCredentials()
 
     // Store default patron array
     patreonCache = PatronOutput{
         Patrons: make([]PatronDisplay, 0),
     }
-
-    // Load the stored tokens
 
     // run the update func in a goroutine
     StartUpdatePatronTimer()

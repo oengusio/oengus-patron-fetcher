@@ -2,6 +2,7 @@ package main
 
 import (
     "encoding/json"
+    "errors"
     "fmt"
     "io/ioutil"
     "log"
@@ -13,7 +14,6 @@ var campaignId = os.Getenv("PATREON_CAMPAIGN_ID")
 var httpClient = http.Client{}
 
 func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
-    // TODO: test if initial refresh token stays the same
     var response PatreonTokens
 
     url := "https://www.patreon.com/api/oauth2/token"
@@ -45,16 +45,20 @@ func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
         log.Fatal(readErr)
     }
 
+    log.Println(body)
+
     jsonErr := json.Unmarshal(body, &response)
     if jsonErr != nil {
         log.Println(jsonErr)
         return response, jsonErr
     }
 
+    file, _ := json.MarshalIndent(response, "", " ")
+    _ = ioutil.WriteFile("cache/patreon-credentials.json", file, 0644)
+
     return response, nil
 }
 
-// TODO: https://www.reddit.com/r/golang/comments/2xmnvs/returning_nil_for_a_struct/
 func FetchPatrons(tokens PatreonTokens) (PatreonMembersResponse, error) {
     var response PatreonMembersResponse
 
@@ -66,12 +70,12 @@ func FetchPatrons(tokens PatreonTokens) (PatreonMembersResponse, error) {
     }
 
     req.Header.Set("User-Agent", "oengus.io/patreon-fetcher")
-    req.Header.Set("Authorisation", "Bearer "+tokens.AccessToken)
+    req.Header.Set("Authorization", "Bearer "+tokens.AccessToken)
 
     query := req.URL.Query()
     query.Set("fields%5Bmember%5D", "full_name,patron_status,will_pay_amount_cents")
     query.Set("include", "user")
-    query.Set("&page%5Bcount%5D", "1000")
+    query.Set("page%5Bcount%5D", "1000")
 
     res, httpErr := httpClient.Do(req)
     if httpErr != nil {
@@ -83,10 +87,16 @@ func FetchPatrons(tokens PatreonTokens) (PatreonMembersResponse, error) {
         defer res.Body.Close()
     }
 
+    if res.StatusCode == http.StatusUnauthorized {
+        return response, errors.New("StatusUnauthorized")
+    }
+
     body, readErr := ioutil.ReadAll(res.Body)
     if readErr != nil {
         log.Fatal(readErr)
     }
+
+    fmt.Println(string(body))
 
     jsonErr := json.Unmarshal(body, &response)
     if jsonErr != nil {
