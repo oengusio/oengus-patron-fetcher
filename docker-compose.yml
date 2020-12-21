@@ -5,7 +5,7 @@ services:
     build:
       context: .
     ports:
-      - "8080:80"
+      - "9000:9000"
     network_mode: "bridge"
     environment:
       - PATREON_CAMPAIGN_ID=5872382
