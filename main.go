@@ -114,7 +114,7 @@ func main() {
 
     mux := http.NewServeMux()
 
-    // Using /patrons here becuase "/" would catch all routes sent to it
+    // TODO: Turn these into nice functions :)
     mux.HandleFunc("/patrons", func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
 
@@ -122,6 +122,24 @@ func main() {
 
         w.Write(theJson)
     })
+
+    mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        // prevent all routes from catching on "/"
+        if r.URL.Path != "/" {
+            http.NotFound(w, r)
+            return
+        }
+
+        w.Header().Set("Content-Type", "application/json")
+
+        // gotta love indentation stuff with this :D
+        w.Write([]byte(`{
+    "routes": {
+        "/patrons": "Fetches the oengus patrons that are on the $25 tier"
+    }
+}`))
+    })
+
 
     log.Println("Listening to port 9000")
 
