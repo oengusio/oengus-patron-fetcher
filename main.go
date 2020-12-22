@@ -77,11 +77,6 @@ func StartUpdatePatronTimer() {
 }
 
 func LoadPatronCredentials() {
-    // create credentials folder
-    if _, err := os.Stat("credentials"); os.IsNotExist(err) {
-        os.Mkdir("credentials", 0700)
-    }
-
     if _, err := os.Stat("/storage/oengus-patreon/patreon-credentials.json"); os.IsNotExist(err) {
         // fetch credentials
         log.Fatal("Failed to load credentials file at \"/storage/oengus-patreon/patreon-credentials.json\"")

@@ -17,7 +17,7 @@ func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
     var response PatreonTokens
 
     url := "https://www.patreon.com/api/oauth2/token"
-    req, err := http.NewRequest(http.MethodGet, url, nil)
+    req, err := http.NewRequest(http.MethodPost, url, nil)
     if err != nil {
         log.Fatal(err)
         return response, err
@@ -44,6 +44,9 @@ func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
     if readErr != nil {
         log.Fatal(readErr)
     }
+
+    // In case I ever need the new tokens
+    log.Println(string(body))
 
     jsonErr := json.Unmarshal(body, &response)
     if jsonErr != nil {
