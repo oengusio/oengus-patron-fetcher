@@ -31,6 +31,8 @@ func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
     query.Set("client_id", os.Getenv("PATREON_CLIENT_ID"))
     query.Set("client_secret", os.Getenv("PATREON_CLIENT_SECRET"))
 
+    req.URL.RawQuery = query.Encode()
+
     res, httpErr := httpClient.Do(req)
     if httpErr != nil {
         log.Fatal(httpErr)
@@ -74,9 +76,11 @@ func FetchPatrons(tokens PatreonTokens) (PatreonMembersResponse, error) {
     req.Header.Set("Authorization", "Bearer "+tokens.AccessToken)
 
     query := req.URL.Query()
-    query.Set("fields%5Bmember%5D", "full_name,patron_status,will_pay_amount_cents")
+    query.Set("fields[member]", "full_name,patron_status,will_pay_amount_cents")
     query.Set("include", "user")
-    query.Set("page%5Bcount%5D", "1000")
+    query.Set("page[count]", "1000")
+
+    req.URL.RawQuery = query.Encode()
 
     res, httpErr := httpClient.Do(req)
     if httpErr != nil {
@@ -96,6 +100,8 @@ func FetchPatrons(tokens PatreonTokens) (PatreonMembersResponse, error) {
     if readErr != nil {
         log.Fatal(readErr)
     }
+
+    log.Println(string(body))
 
     jsonErr := json.Unmarshal(body, &response)
     if jsonErr != nil {
