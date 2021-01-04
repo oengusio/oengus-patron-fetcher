@@ -41,7 +41,7 @@ func UpdatePatrons() {
         attr := patron.Attributes
 
         // is an active patron that pays $25 or more
-        if attr.PatronStatus == "active_patron" && attr.WillPayAmountCents >= 2500 {
+        if attr.PatronStatus == "active_patron" /*&& attr.WillPayAmountCents >= 2500*/ {
             newCache.Patrons = append(newCache.Patrons, PatronDisplay{
                 Id: patron.Relationships.User.Data.Id,
                 Name: attr.FullName,

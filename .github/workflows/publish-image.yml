@@ -19,8 +19,7 @@ jobs:
                 registry: docker.pkg.github.com
                 repository: esamarathon/oengus-patron-fetcher/patron-fetcher
                 tags: latest
-                # we're doing manual updates
-#            - name: Trigger dev webhook
-#              uses: zzzze/webhook-trigger@v1.0.0
-#              with:
-#                webhook_url: ${{ secrets.DEV_WEBHOOK_URL }}
+            - name: Trigger dev webhook
+              uses: zzzze/webhook-trigger@v1.0.0
+              with:
+                webhook_url: ${{ secrets.DEV_WEBHOOK_URL }}
