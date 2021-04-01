@@ -20,7 +20,13 @@ func UpdatePatrons() {
 
     // 401 response, refresh the tokens
     if err != nil && err.Error() == "StatusUnauthorized" {
-        newTokens, _ := RefreshToken(tokens)
+        newTokens, refreshErr := RefreshToken(tokens)
+
+
+        if refreshErr != nil {
+            log.Println("Error while refreshing tokens", refreshErr.Error())
+            return
+        }
 
         tokens = newTokens
 

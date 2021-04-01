@@ -8,6 +8,7 @@ import (
     "log"
     "net/http"
     "os"
+    "strings"
 )
 
 var campaignId = os.Getenv("PATREON_CAMPAIGN_ID")
@@ -48,7 +49,12 @@ func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
     }
 
     // In case I ever need the new tokens
-    log.Println(string(body))
+    strBody := string(body)
+    log.Println("credentials fetched: " + strBody)
+
+    if strings.Contains(strBody, "error") {
+        return response, errors.New(strBody)
+    }
 
     jsonErr := json.Unmarshal(body, &response)
     if jsonErr != nil {
