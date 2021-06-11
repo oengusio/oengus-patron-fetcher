@@ -7,6 +7,7 @@ import (
     "io/ioutil"
     "log"
     "net/http"
+    "oenugs-patreon/structs"
     "os"
     "strings"
 )
@@ -14,8 +15,8 @@ import (
 var campaignId = os.Getenv("PATREON_CAMPAIGN_ID")
 var httpClient = http.Client{}
 
-func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
-    var response PatreonTokens
+func RefreshToken(tokens structs.PatreonTokens) (structs.PatreonTokens, error) {
+    var response structs.PatreonTokens
 
     url := "https://www.patreon.com/api/oauth2/token"
     req, err := http.NewRequest(http.MethodPost, url, nil)
@@ -68,8 +69,8 @@ func RefreshToken(tokens PatreonTokens) (PatreonTokens, error) {
     return response, nil
 }
 
-func FetchPatrons(tokens PatreonTokens) (PatreonMembersResponse, error) {
-    var response PatreonMembersResponse
+func FetchPatrons(tokens structs.PatreonTokens) (structs.PatreonMembersResponse, error) {
+    var response structs.PatreonMembersResponse
 
     url := fmt.Sprintf("https://www.patreon.com/api/oauth2/v2/campaigns/%s/members", campaignId)
     req, err := http.NewRequest(http.MethodGet, url, nil)

@@ -1,4 +1,4 @@
-package main
+package structs
 
 //// Output shown to the user
 type PatronDisplay struct {

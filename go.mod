@@ -1,3 +1,3 @@
 module oenugs-patreon
 
-go 1.15
+go 1.16
