@@ -36,4 +36,20 @@ func OauthAuthorize(w http.ResponseWriter, r *http.Request) {
     }
 
     log.Println(token)
+
+    user, fetchErr := patreon.Oauth2FetchUser(token)
+
+    if fetchErr != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte(fmt.Sprintf(
+            `{"error": "%s"}`,
+            fetchErr.Error(),
+        )))
+        return
+    }
+
+    log.Println(user)
+
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte(`{"error": "boop"}`))
 }
