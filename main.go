@@ -18,6 +18,8 @@ func InitApp() {
 
     // only load the patrons if we want to
     if os.Getenv("DISABLE_CLOCK") == "false" {
+        log.Println("Starting clock")
+
         // Load the stored tokens
         LoadPatronCredentials()
 

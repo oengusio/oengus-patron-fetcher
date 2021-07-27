@@ -3,7 +3,6 @@ package httpHandlers
 import (
     "encoding/json"
     "fmt"
-    "log"
     "net/http"
     "oenugs-patreon/patreon"
 )
@@ -36,8 +35,6 @@ func OauthAuthorize(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    log.Println(token)
-
     user, fetchErr := patreon.Oauth2FetchUser(token)
 
     if fetchErr != nil {
@@ -49,10 +46,8 @@ func OauthAuthorize(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    log.Println(user)
-
     w.WriteHeader(http.StatusOK)
-    data,_ := json.Marshal(user)
+    data,_ := json.Marshal(user.Data)
 
     w.Write(data)
 }

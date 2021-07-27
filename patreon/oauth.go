@@ -23,7 +23,6 @@ func Oauth2FetchToken(code string) (structs.PatreonTokens, error) {
     query.Set("client_id", os.Getenv("PATREON_CLIENT_ID"))
     query.Set("client_secret", os.Getenv("PATREON_CLIENT_SECRET"))
     query.Set("redirect_uri", os.Getenv("OENGUS_BASE") + "/user/settings/sync/patreon")
-
     queryBytes := []byte(query.Encode())
 
     apiUrl := "https://api.patreon.com/oauth2/token"
@@ -35,6 +34,7 @@ func Oauth2FetchToken(code string) (structs.PatreonTokens, error) {
     }
 
     req.Header.Set("User-Agent", "oengus.io/patreon-fetcher")
+    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
     res, httpErr := httpClient.Do(req)
     if httpErr != nil {
@@ -54,7 +54,6 @@ func Oauth2FetchToken(code string) (structs.PatreonTokens, error) {
 
     // In case I ever need the new tokens
     strBody := string(body)
-    log.Println("credentials fetched: " + strBody)
 
     if strings.Contains(strBody, "error") {
         return response, errors.New(strBody)
@@ -101,7 +100,6 @@ func Oauth2FetchUser(token structs.PatreonTokens) (structs.PatronRelationshipUse
 
     // In case I ever need the new tokens
     strBody := string(body)
-    log.Println("credentials fetched: " + strBody)
 
     if strings.Contains(strBody, "error") {
         return response, errors.New(strBody)
