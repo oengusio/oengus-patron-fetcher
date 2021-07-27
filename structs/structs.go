@@ -1,6 +1,6 @@
 package structs
 
-//// Output shown to the user
+// PatronDisplay // Output shown to the user
 type PatronDisplay struct {
     Name string `json:"full_name"`
     // assign this somehow (or just do it in frontend?)
@@ -12,13 +12,16 @@ type PatronOutput struct {
     Patrons []PatronDisplay `json:"patrons"`
 }
 
-//// Credentials file
+// PatreonTokens // Credentials file
 type PatreonTokens struct {
     AccessToken  string `json:"access_token"`
     RefreshToken string `json:"refresh_token"`
+    TokenType string `json:"token_type"`
+    Scope string `json:"scope"`
+    ExpiresIn int `json:"expires_in"`
 }
 
-//// Patreon api responses
+// PatreonMembersResponse // Patreon api responses
 type PatreonMembersResponse struct {
     Data []PatreonMembersData `json:"data"`
 }

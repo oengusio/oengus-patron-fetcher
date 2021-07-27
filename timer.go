@@ -4,6 +4,7 @@ import (
     "encoding/json"
     "io/ioutil"
     "log"
+    "oenugs-patreon/patreon"
     "oenugs-patreon/cache"
     "oenugs-patreon/structs"
     "os"
@@ -14,11 +15,11 @@ import (
 func UpdatePatrons() {
     log.Println("Updating patrons")
 
-    patrons, err := FetchPatrons(cache.Tokens)
+    patrons, err := patreon.FetchPatrons(cache.Tokens)
 
     // 401 response, refresh the tokens
     if err != nil && err.Error() == "StatusUnauthorized" {
-        newTokens, refreshErr := RefreshToken(cache.Tokens)
+        newTokens, refreshErr := patreon.RefreshToken(cache.Tokens)
 
         if refreshErr != nil {
             log.Println("Error while refreshing tokens", refreshErr.Error())
@@ -26,7 +27,7 @@ func UpdatePatrons() {
         }
 
         cache.Tokens = newTokens
-        patrons, err = FetchPatrons(cache.Tokens)
+        patrons, err = patreon.FetchPatrons(cache.Tokens)
     }
 
     if err != nil {

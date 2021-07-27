@@ -1,4 +1,4 @@
-package main
+package patreon
 
 import (
     "encoding/json"
@@ -18,8 +18,8 @@ var httpClient = http.Client{}
 func RefreshToken(tokens structs.PatreonTokens) (structs.PatreonTokens, error) {
     var response structs.PatreonTokens
 
-    url := "https://www.patreon.com/api/oauth2/token"
-    req, err := http.NewRequest(http.MethodPost, url, nil)
+    apiUrl := "https://api.patreon.com/oauth2/token"
+    req, err := http.NewRequest(http.MethodPost, apiUrl, nil)
     if err != nil {
         log.Fatal(err)
         return response, err
@@ -37,7 +37,8 @@ func RefreshToken(tokens structs.PatreonTokens) (structs.PatreonTokens, error) {
 
     res, httpErr := httpClient.Do(req)
     if httpErr != nil {
-        log.Fatal(httpErr)
+        log.Println(httpErr)
+        return response, httpErr
     }
 
     if res.Body != nil {
@@ -46,7 +47,8 @@ func RefreshToken(tokens structs.PatreonTokens) (structs.PatreonTokens, error) {
 
     body, readErr := ioutil.ReadAll(res.Body)
     if readErr != nil {
-        log.Fatal(readErr)
+        log.Println(readErr)
+        return response, readErr
     }
 
     // In case I ever need the new tokens
@@ -72,10 +74,10 @@ func RefreshToken(tokens structs.PatreonTokens) (structs.PatreonTokens, error) {
 func FetchPatrons(tokens structs.PatreonTokens) (structs.PatreonMembersResponse, error) {
     var response structs.PatreonMembersResponse
 
-    url := fmt.Sprintf("https://www.patreon.com/api/oauth2/v2/campaigns/%s/members", campaignId)
-    req, err := http.NewRequest(http.MethodGet, url, nil)
+    apiUrl := fmt.Sprintf("https://api.patreon.com/oauth2/v2/campaigns/%s/members", campaignId)
+    req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
     if err != nil {
-        log.Fatal(err)
+        log.Println(err)
         return response, err
     }
 
@@ -91,7 +93,8 @@ func FetchPatrons(tokens structs.PatreonTokens) (structs.PatreonMembersResponse,
 
     res, httpErr := httpClient.Do(req)
     if httpErr != nil {
-        log.Fatal(httpErr)
+        log.Println(httpErr)
+        return response, httpErr
     }
 
     // defer calls are not executed until the function returns
@@ -105,7 +108,8 @@ func FetchPatrons(tokens structs.PatreonTokens) (structs.PatreonMembersResponse,
 
     body, readErr := ioutil.ReadAll(res.Body)
     if readErr != nil {
-        log.Fatal(readErr)
+        log.Print(readErr)
+        return response, readErr
     }
 
     log.Println(string(body))

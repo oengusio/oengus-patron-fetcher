@@ -14,5 +14,6 @@ services:
       - PATREON_CLIENT_ID=
       - PATREON_CLIENT_SECRET=
       - PATREON_WEBHOOK_SECRET=
+      - OENGUS_BASE=https://oengus.io
 volumes:
   credentials:
