@@ -6,20 +6,24 @@ import (
     "oenugs-patreon/cache"
     "oenugs-patreon/httpHandlers"
     "oenugs-patreon/structs"
+    "os"
     "time"
 )
 
 func InitApp() {
-    // Load the stored tokens
-    LoadPatronCredentials()
-
     // Store default patron array
     cache.PatronCache = structs.PatronOutput{
         Patrons: make([]structs.PatronDisplay, 0),
     }
 
-    // run the update func in a goroutine
-    StartUpdatePatronTimer()
+    // only load the patrons if we want to
+    if os.Getenv("DISABLE_CLOCK") == "false" {
+        // Load the stored tokens
+        LoadPatronCredentials()
+
+        // run the update func in a goroutine
+        StartUpdatePatronTimer()
+    }
 }
 
 func logRequestHandler(h http.Handler) http.Handler {

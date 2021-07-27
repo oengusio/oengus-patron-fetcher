@@ -1,6 +1,7 @@
 package httpHandlers
 
 import (
+    "encoding/json"
     "fmt"
     "log"
     "net/http"
@@ -51,5 +52,7 @@ func OauthAuthorize(w http.ResponseWriter, r *http.Request) {
     log.Println(user)
 
     w.WriteHeader(http.StatusOK)
-    w.Write([]byte(`{"error": "boop"}`))
+    data,_ := json.Marshal(user)
+
+    w.Write(data)
 }
