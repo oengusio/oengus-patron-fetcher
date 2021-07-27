@@ -67,3 +67,15 @@ func Oauth2FetchToken(code string) (structs.PatreonTokens, error) {
 
     return response, nil
 }
+
+func Oauth2FetchUser(token structs.PatreonTokens) {
+    apiUrl := "https://api.patreon.com/oauth2/v2/identity"
+    req, err := http.NewRequest(http.MethodPost, apiUrl, nil)
+
+    if err != nil {
+        log.Println(err)
+        return response, err
+    }
+
+    req.Header.Set("User-Agent", "oengus.io/patreon-fetcher")
+}

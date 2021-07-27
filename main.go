@@ -48,6 +48,7 @@ func main() {
 
     mux := http.NewServeMux()
 
+    mux.HandleFunc("/sync", httpHandlers.OauthAuthorize)
     mux.HandleFunc("/patrons", httpHandlers.Patrons)
     mux.HandleFunc("/webhook", httpHandlers.Webhook)
     mux.HandleFunc("/", httpHandlers.Root)
