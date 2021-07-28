@@ -2,7 +2,6 @@ package httpHandlers
 
 import (
     "encoding/json"
-    "fmt"
     "net/http"
     "oenugs-patreon/patreon"
 )
@@ -28,10 +27,7 @@ func OauthAuthorize(w http.ResponseWriter, r *http.Request) {
 
     if err != nil {
         w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte(fmt.Sprintf(
-            `{"error": "%s"}`,
-            err.Error(),
-        )))
+        w.Write([]byte(err.Error()))
         return
     }
 
@@ -39,10 +35,7 @@ func OauthAuthorize(w http.ResponseWriter, r *http.Request) {
 
     if fetchErr != nil {
         w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte(fmt.Sprintf(
-            `{"error": "%s"}`,
-            fetchErr.Error(),
-        )))
+        w.Write([]byte(fetchErr.Error()))
         return
     }
 

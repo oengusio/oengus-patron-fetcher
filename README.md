@@ -8,6 +8,8 @@ A microservice that fetches the patrons from [oengus.io](https://oengus.io/)
 - Docker
 
 ##### Docker (recommended)
+This package is distributed on docker hub: https://hub.docker.com/repository/docker/oengusio/patreon-fetcher
+
 Copy `docker-compose.yml` to `docker-compose.override.yml` and ill in the environment variables, then run `docker-compose up --build`
 
 ##### With ide (tested with GoLand)
