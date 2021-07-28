@@ -3,9 +3,14 @@ package httpHandlers
 import (
     "crypto/hmac"
     "crypto/md5"
+    "encoding/hex"
+    "encoding/json"
     "io/ioutil"
+    "log"
     "net/http"
+    "oenugs-patreon/structs"
     "os"
+    "strings"
 )
 
 func Webhook(w http.ResponseWriter, r *http.Request) {
@@ -35,26 +40,76 @@ func Webhook(w http.ResponseWriter, r *http.Request) {
     hash := hmac.New(md5.New, []byte(os.Getenv("PATREON_WEBHOOK_SECRET")))
     hash.Write(body)
 
-    if !hmac.Equal([]byte(secret), hash.Sum(nil)) {
+    calculated := hex.EncodeToString(hash.Sum(nil))
+
+    if calculated != secret {
         w.WriteHeader(http.StatusBadRequest)
         w.Write([]byte(`{"error": "X-Patreon-Signature header is not valid"}`))
         return
     }
 
+    log.Println(string(body))
+
     event := r.Header.Get("X-Patreon-Event")
 
     switch event {
     case "members:pledge:create":
+        w.WriteHeader(http.StatusOK)
         // new patron
+        var pledge structs.WebhookPledge
+        json.Unmarshal(body, &pledge)
+
+        go addPledge(pledge)
         break
     case "members:pledge:update":
+        w.WriteHeader(http.StatusOK)
         // Updated patron
+        var pledge structs.WebhookPledge
+        json.Unmarshal(body, &pledge)
+
+        go updatePledge(pledge)
         break
     case "members:pledge:delete":
+        w.WriteHeader(http.StatusOK)
         // Remove perks
+        var pledge structs.WebhookPledge
+        json.Unmarshal(body, &pledge)
+
+        go deletePledge(pledge)
         break
     default:
+        w.WriteHeader(http.StatusBadRequest)
         w.Write([]byte(`{"error": "event not programmed"}`))
         break
     }
+}
+
+func addPledge(pledge structs.WebhookPledge) {
+    status := parseStatus(pledge.Data.Attributes.PatronStatus)
+
+    if status == "" {
+        // TODO: remove
+    }
+
+    userId := pledge.Data.Relationships.User.Data.Id
+    payAmount := pledge.Data.Attributes.PledgeAmountCents
+}
+
+func updatePledge(pledge structs.WebhookPledge) {
+    status := parseStatus(pledge.Data.Attributes.PatronStatus)
+
+    if status == "" {
+        // TODO: remove
+    }
+
+    userId := pledge.Data.Relationships.User.Data.Id
+    payAmount := pledge.Data.Attributes.PledgeAmountCents
+}
+
+func deletePledge(pledge structs.WebhookPledge) {
+    userId := pledge.Data.Relationships.User.Data.Id
+}
+
+func parseStatus(status string) string {
+    return strings.ToUpper(status)
 }

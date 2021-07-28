@@ -49,3 +49,26 @@ type PatreonMembersAttribute struct {
     PatronStatus       string `json:"patron_status"`
     WillPayAmountCents int    `json:"will_pay_amount_cents"`
 }
+
+type RelatedLink struct {
+    Related string `json:"related"`
+}
+
+// WebhookPledge adapted to only include the items I need
+type WebhookPledge struct {
+    Data struct {
+        Type       string `json:"type"`
+        ID         string `json:"id"`
+        Attributes struct {
+            PledgeAmountCents int    `json:"pledge_amount_cents"`
+            LastChargeStatus  string `json:"last_charge_status"`
+            PatronStatus      string `json:"patron_status"`
+        } `json:"attributes"`
+        Relationships struct {
+            User struct {
+                Data PatronRelationshipUserData `json:"data"`
+                Links RelatedLink               `json:"links"`
+            }  `json:"user"`
+        } `json:"relationships"`
+    } `json:"data"`
+}

@@ -10,6 +10,7 @@ import (
     "time"
 )
 
+// InitApp maybe switch to https://github.com/mxpv/patreon-go?
 func InitApp() {
     // Store default patron array
     cache.PatronCache = structs.PatronOutput{
