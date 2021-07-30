@@ -8,6 +8,7 @@ import (
     "io/ioutil"
     "log"
     "net/http"
+    "oenugs-patreon/sql"
     "oenugs-patreon/structs"
     "os"
     "strings"
@@ -93,21 +94,28 @@ func addPledge(pledge structs.WebhookPledge) {
 
     userId := pledge.Data.Relationships.User.Data.Id
     payAmount := pledge.Data.Attributes.PledgeAmountCents
+
+    go sql.InsertMember(userId, status, payAmount)
 }
 
 func updatePledge(pledge structs.WebhookPledge) {
     status := parseStatus(pledge.Data.Attributes.PatronStatus)
 
     if status == "" {
-        // TODO: remove
+        deletePledge(pledge)
+        return
     }
 
     userId := pledge.Data.Relationships.User.Data.Id
     payAmount := pledge.Data.Attributes.PledgeAmountCents
+
+    go sql.UpdateMember(userId, status, payAmount)
 }
 
 func deletePledge(pledge structs.WebhookPledge) {
     userId := pledge.Data.Relationships.User.Data.Id
+
+    go sql.DeleteMember(userId)
 }
 
 func parseStatus(status string) string {
