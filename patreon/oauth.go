@@ -79,6 +79,13 @@ func Oauth2FetchUser(token structs.PatreonTokens) (structs.PatronRelationshipUse
         return response, err
     }
 
+    query := req.URL.Query()
+    // we get info about our own campaign if we do not set the identity.memberships scope
+    query.Set("include", "memberships")
+    query.Set("fields[member]", "patron_status")
+
+    req.URL.RawQuery = query.Encode()
+
     req.Header.Set("User-Agent", "oengus.io/patreon-fetcher")
     req.Header.Set("Authorization", fmt.Sprintf("%s %s", token.TokenType, token.AccessToken))
 
@@ -100,6 +107,8 @@ func Oauth2FetchUser(token structs.PatreonTokens) (structs.PatronRelationshipUse
 
     // In case I ever need the new tokens
     strBody := string(body)
+
+    log.Println(strBody)
 
     if strings.Contains(strBody, "error") {
         return response, errors.New(strBody)

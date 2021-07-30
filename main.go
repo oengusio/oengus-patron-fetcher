@@ -12,7 +12,6 @@ import (
     "time"
 )
 
-// InitApp maybe switch to https://github.com/mxpv/patreon-go?
 func InitApp() {
     // Store default patron array
     cache.PatronCache = structs.PatronOutput{
@@ -25,18 +24,10 @@ func InitApp() {
     signal.Notify(sigint, os.Interrupt)
 
     go func() {
-        for {
-            select {
-            case <- sigint:
-                log.Println("Disconnecting database...")
-                err := sql.Stop()
+        <- sigint
 
-                if err != nil {
-                    panic(err)
-                }
-                return
-            }
-        }
+        log.Println("Disconnecting database...")
+        defer sql.Stop()
     }()
 
     // only load the patrons if we want to

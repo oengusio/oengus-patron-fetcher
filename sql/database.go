@@ -23,14 +23,19 @@ func Start() {
     db = conn
 }
 
-func Stop() error {
-    return db.Close(context.Background())
+func Stop() {
+    defer func(db *pgx.Conn, ctx context.Context) {
+        err := db.Close(ctx)
+        if err != nil {
+            log.Println(err)
+        }
+    }(db, context.Background())
 }
 
 func InsertMember(userId string, status string, payAmount int) {
     sql := "INSERT INTO patreon_status(patreon_id, status, pledge_amount) VALUES($1, $2, $3);"
 
-    err := db.QueryRow(context.Background(), sql, userId, status, payAmount)
+    _, err := db.Query(context.Background(), sql, userId, status, payAmount)
 
     if err != nil {
         fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
@@ -41,7 +46,7 @@ func InsertMember(userId string, status string, payAmount int) {
 func UpdateMember(userId string, status string, payAmount int) {
     sql := "UPDATE patreon_status SET status = $2, pledge_amount = $3 WHERE patreon_id = $1;"
 
-    err := db.QueryRow(context.Background(), sql, userId, status, payAmount)
+    _, err := db.Query(context.Background(), sql, userId, status, payAmount)
 
     if err != nil {
         fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
@@ -52,7 +57,7 @@ func UpdateMember(userId string, status string, payAmount int) {
 func DeleteMember(userId string) {
     sql := "DELETE FROM patreon_status WHERE patreon_id = $1;"
 
-    err := db.QueryRow(context.Background(), sql, userId)
+    _, err := db.Query(context.Background(), sql, userId)
 
     if err != nil {
         fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)

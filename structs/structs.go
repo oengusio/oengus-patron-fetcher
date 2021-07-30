@@ -27,6 +27,8 @@ type PatreonMembersResponse struct {
 }
 
 type PatreonMembersData struct {
+    Type          string                  `json:"type"`
+    ID            string                  `json:"id"` // this is the member's id
     Attributes    PatreonMembersAttribute `json:"attributes"`
     Relationships PatronRelationship      `json:"relationships"`
 }
@@ -42,6 +44,16 @@ type PatronRelationshipUser struct {
 type PatronRelationshipUserData struct {
     Id   string `json:"id"`
     Type string `json:"type"`
+    Relationships struct {
+        Memberships struct {
+            Data []PatreonMembersAttribute `json:"data"`
+        } `json:"memberships"`
+    } `json:"relationships"`
+}
+
+type MemberRelationship struct {
+    Type string `json:"type"`
+    ID   string `json:"id"` // this is the member's id
 }
 
 type PatreonMembersAttribute struct {
@@ -58,7 +70,7 @@ type RelatedLink struct {
 type WebhookPledge struct {
     Data struct {
         Type       string `json:"type"`
-        ID         string `json:"id"`
+        ID         string `json:"id"` // this is the member id
         Attributes struct {
             PledgeAmountCents int    `json:"pledge_amount_cents"`
             LastChargeStatus  string `json:"last_charge_status"`
