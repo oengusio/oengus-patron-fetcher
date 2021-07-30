@@ -10,6 +10,7 @@ services:
       - "9000:9000"
     network_mode: "bridge"
     environment:
+      - DATABASE_URL=postgresql://postgres@localhost:5432/oengus
       - DISABLE_CLOCK=true
       - PATREON_CAMPAIGN_ID=5872382
       - PATREON_CLIENT_ID=

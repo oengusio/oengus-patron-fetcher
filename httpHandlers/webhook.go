@@ -6,7 +6,6 @@ import (
     "encoding/hex"
     "encoding/json"
     "io/ioutil"
-    "log"
     "net/http"
     "oenugs-patreon/sql"
     "oenugs-patreon/structs"
@@ -49,7 +48,7 @@ func Webhook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    log.Println(string(body))
+    //log.Println(string(body))
 
     event := r.Header.Get("X-Patreon-Event")
 
@@ -89,7 +88,8 @@ func addPledge(pledge structs.WebhookPledge) {
     status := parseStatus(pledge.Data.Attributes.PatronStatus)
 
     if status == "" {
-        // TODO: remove
+        deletePledge(pledge)
+        return
     }
 
     userId := pledge.Data.Relationships.User.Data.Id

@@ -1,8 +1,8 @@
 FROM golang:1.16-alpine AS builder
 
 WORKDIR /oengus-patreon
-#COPY go.mod go.sum ./
-COPY go.mod ./
+COPY go.mod go.sum ./
+#COPY go.mod ./
 RUN go mod download
 COPY . .
 RUN go build -o main .

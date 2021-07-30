@@ -1,59 +1,62 @@
 package sql
 
 import (
-    "github.com/go-pg/pg/v10"
-    "oenugs-patreon/structs"
+    "context"
+    "fmt"
+    "github.com/jackc/pgx/v4"
+    "log"
+    "os"
 )
 
-var db *pg.DB
+var db *pgx.Conn
 
 func Start() {
-    db = pg.Connect(&pg.Options{})
-}
+    log.Println(os.Getenv("DATABASE_URL"))
 
-func InsertMember(status string, userId string, payAmount int) {
-    // sql := "INSERT INTO patreon_status(patreon_id, status, pledge_amount) VALUES(?, ?, ?);"
-
-    model := &structs.PatreonStatus{
-        PatreonId:    userId,
-        Status:       status,
-        PledgeAmount: payAmount,
-    }
-
-    _, err := db.Model(model).Insert()
+    conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 
     if err != nil {
-        panic(err)
+        fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+        os.Exit(1)
+    }
+
+    db = conn
+}
+
+func Stop() error {
+    return db.Close(context.Background())
+}
+
+func InsertMember(userId string, status string, payAmount int) {
+    sql := "INSERT INTO patreon_status(patreon_id, status, pledge_amount) VALUES($1, $2, $3);"
+
+    err := db.QueryRow(context.Background(), sql, userId, status, payAmount)
+
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+        os.Exit(1)
     }
 }
 
-func UpdateMember(status string, userId string, payAmount int) {
-    // sql := "UPDATE patreon_status SET status = ?, pledge_amount = ? WHERE patreon_id = ?;"
+func UpdateMember(userId string, status string, payAmount int) {
+    sql := "UPDATE patreon_status SET status = $2, pledge_amount = $3 WHERE patreon_id = $1;"
 
-    model := &structs.PatreonStatus{
-        PatreonId:    userId,
-        Status:       status,
-        PledgeAmount: payAmount,
-    }
-
-    _, err := db.Model(model).WherePK().Update()
+    err := db.QueryRow(context.Background(), sql, userId, status, payAmount)
 
     if err != nil {
-        panic(err)
+        fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+        os.Exit(1)
     }
 }
 
 func DeleteMember(userId string) {
-    // sql := "DELETE FROM patreon_status WHERE patreon_id = ?;"
+    sql := "DELETE FROM patreon_status WHERE patreon_id = $1;"
 
-    model := &structs.PatreonStatus{
-        PatreonId:    userId,
-    }
-
-    _, err := db.Model(model).WherePK().Delete()
+    err := db.QueryRow(context.Background(), sql, userId)
 
     if err != nil {
-        panic(err)
+        fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+        os.Exit(1)
     }
 }
 
