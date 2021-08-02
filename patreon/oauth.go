@@ -82,7 +82,7 @@ func Oauth2FetchUser(token structs.PatreonTokens) (structs.PatronRelationshipUse
     query := req.URL.Query()
     // we get info about our own campaign if we do not set the identity.memberships scope
     query.Set("include", "memberships")
-    query.Set("fields[member]", "patron_status")
+    query.Set("fields[member]", "patron_status,will_pay_amount_cents")
 
     req.URL.RawQuery = query.Encode()
 

@@ -40,7 +40,7 @@ func OauthAuthorize(w http.ResponseWriter, r *http.Request) {
     }
 
     w.WriteHeader(http.StatusOK)
-    data,_ := json.Marshal(user.Data)
+    data,_ := json.Marshal(user)
 
     w.Write(data)
 }

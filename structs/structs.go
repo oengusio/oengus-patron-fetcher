@@ -39,6 +39,11 @@ type PatronRelationship struct {
 
 type PatronRelationshipUser struct {
     Data PatronRelationshipUserData `json:"data"`
+    Included []struct {
+        Attributes PatreonMembersAttribute `json:"attributes"`
+        ID string `json:"id"`
+        Type string `json:"type"`
+    } `json:"included"`
 }
 
 type PatronRelationshipUserData struct {
@@ -46,7 +51,10 @@ type PatronRelationshipUserData struct {
     Type string `json:"type"`
     Relationships struct {
         Memberships struct {
-            Data []PatreonMembersAttribute `json:"data"`
+            Data []struct {
+                ID string `json:"id"`
+                Type string `json:"type"`
+            } `json:"data"`
         } `json:"memberships"`
     } `json:"relationships"`
 }
