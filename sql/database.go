@@ -8,9 +8,7 @@ import (
     "os"
 )
 
-var db *pgx.Conn
-
-func Start() {
+func getConnection() *pgx.Conn {
     log.Println(os.Getenv("DATABASE_URL"))
 
     conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
@@ -20,20 +18,22 @@ func Start() {
         os.Exit(1)
     }
 
-    db = conn
+    return conn
 }
 
-func Stop() {
-    defer func(db *pgx.Conn, ctx context.Context) {
-        err := db.Close(ctx)
-        if err != nil {
-            log.Println(err)
-        }
-    }(db, context.Background())
+func closeConnection(db *pgx.Conn) {
+    err := db.Close(context.Background())
+
+    if err != nil {
+        log.Println(err)
+    }
 }
 
 func InsertMember(userId string, status string, payAmount int) {
     sql := "INSERT INTO patreon_status(patreon_id, status, pledge_amount) VALUES($1, $2, $3);"
+
+    db := getConnection()
+    defer closeConnection(db)
 
     _, err := db.Query(context.Background(), sql, userId, status, payAmount)
 
@@ -46,6 +46,9 @@ func InsertMember(userId string, status string, payAmount int) {
 func UpdateMember(userId string, status string, payAmount int) {
     sql := "UPDATE patreon_status SET status = $2, pledge_amount = $3 WHERE patreon_id = $1;"
 
+    db := getConnection()
+    defer closeConnection(db)
+
     _, err := db.Query(context.Background(), sql, userId, status, payAmount)
 
     if err != nil {
@@ -56,6 +59,9 @@ func UpdateMember(userId string, status string, payAmount int) {
 
 func DeleteMember(userId string) {
     sql := "DELETE FROM patreon_status WHERE patreon_id = $1;"
+
+    db := getConnection()
+    defer closeConnection(db)
 
     _, err := db.Query(context.Background(), sql, userId)
 

@@ -5,10 +5,8 @@ import (
     "net/http"
     "oenugs-patreon/cache"
     "oenugs-patreon/httpHandlers"
-    "oenugs-patreon/sql"
     "oenugs-patreon/structs"
     "os"
-    "os/signal"
     "time"
 )
 
@@ -17,18 +15,6 @@ func InitApp() {
     cache.PatronCache = structs.PatronOutput{
         Patrons: make([]structs.PatronDisplay, 0),
     }
-
-    go sql.Start()
-
-    sigint := make(chan os.Signal, 1)
-    signal.Notify(sigint, os.Interrupt)
-
-    go func() {
-        <- sigint
-
-        log.Println("Disconnecting database...")
-        defer sql.Stop()
-    }()
 
     // only load the patrons if we want to
     if os.Getenv("DISABLE_CLOCK") == "false" {
