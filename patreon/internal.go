@@ -86,6 +86,7 @@ func FetchPatrons(tokens structs.PatreonTokens) (structs.PatreonMembersResponse,
 
     query := req.URL.Query()
     query.Set("fields[member]", "full_name,patron_status,will_pay_amount_cents")
+    query.Set("fields[user]", "image_url")
     query.Set("include", "user")
     query.Set("page[count]", "1000")
 

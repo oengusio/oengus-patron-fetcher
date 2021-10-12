@@ -4,8 +4,8 @@ import (
     "encoding/json"
     "io/ioutil"
     "log"
-    "oenugs-patreon/patreon"
     "oenugs-patreon/cache"
+    "oenugs-patreon/patreon"
     "oenugs-patreon/structs"
     "os"
     "os/signal"
@@ -40,14 +40,18 @@ func UpdatePatrons() {
     }
 
     // for {key}, {value} := range {list}
-    for _, patron := range patrons.Data {
+    for i, patron := range patrons.Data {
         attr := patron.Attributes
 
         // is an active patron that pays $25 or more
         if attr.PatronStatus == "active_patron" /*&& attr.WillPayAmountCents >= 2500*/ {
+            userId := patron.Relationships.User.Data.Id
+            imageUrl := patrons.Included[i].Attributes.ImageUrl
+
             newCache.Patrons = append(newCache.Patrons, structs.PatronDisplay{
-                Id: patron.Relationships.User.Data.Id,
-                Name: attr.FullName,
+                Id:       userId,
+                Name:     attr.FullName,
+                ImageUrl: imageUrl,
             })
         }
     }

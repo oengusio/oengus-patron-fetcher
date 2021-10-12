@@ -6,6 +6,7 @@ type PatronDisplay struct {
     // assign this somehow (or just do it in frontend?)
     //p.Url = "https://www.patreon.com/user?u=" + p.Id
     Id string `json:"id"`
+    ImageUrl string `json:"image_url"`
 }
 
 type PatronOutput struct {
@@ -24,6 +25,11 @@ type PatreonTokens struct {
 // PatreonMembersResponse // Patreon api responses
 type PatreonMembersResponse struct {
     Data []PatreonMembersData `json:"data"`
+    Included []struct {
+        Attributes PatronUsersAttribute `json:"attributes"`
+        ID string `json:"id"`
+        Type string `json:"type"`
+    } `json:"included"`
 }
 
 type PatreonMembersData struct {
@@ -44,6 +50,10 @@ type PatronRelationshipUser struct {
         ID string `json:"id"`
         Type string `json:"type"`
     } `json:"included"`
+}
+
+type PatronUsersAttribute struct {
+    ImageUrl string `json:"image_url"`
 }
 
 type PatronRelationshipUserData struct {
