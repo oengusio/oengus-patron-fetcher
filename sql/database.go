@@ -1,74 +1,70 @@
 package sql
 
 import (
-    "context"
-    "fmt"
-    "github.com/jackc/pgx/v4"
-    "log"
-    "os"
+	"context"
+	"fmt"
+	"github.com/jackc/pgx/v4"
+	"log"
+	"os"
 )
 
 func getConnection() *pgx.Conn {
-    log.Println(os.Getenv("DATABASE_URL"))
+	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 
-    conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
 
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-        os.Exit(1)
-    }
-
-    return conn
+	return conn
 }
 
 func closeConnection(db *pgx.Conn) {
-    err := db.Close(context.Background())
+	err := db.Close(context.Background())
 
-    if err != nil {
-        log.Println(err)
-    }
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func InsertMember(userId string, status string, payAmount int) {
-    sql := "INSERT INTO patreon_status(patreon_id, status, pledge_amount) VALUES($1, $2, $3);"
+	sql := "INSERT INTO patreon_status(patreon_id, status, pledge_amount) VALUES($1, $2, $3);"
 
-    db := getConnection()
-    defer closeConnection(db)
+	db := getConnection()
+	defer closeConnection(db)
 
-    _, err := db.Query(context.Background(), sql, userId, status, payAmount)
+	_, err := db.Query(context.Background(), sql, userId, status, payAmount)
 
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-        os.Exit(1)
-    }
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 func UpdateMember(userId string, status string, payAmount int) {
-    sql := "UPDATE patreon_status SET status = $2, pledge_amount = $3 WHERE patreon_id = $1;"
+	sql := "UPDATE patreon_status SET status = $2, pledge_amount = $3 WHERE patreon_id = $1;"
 
-    db := getConnection()
-    defer closeConnection(db)
+	db := getConnection()
+	defer closeConnection(db)
 
-    _, err := db.Query(context.Background(), sql, userId, status, payAmount)
+	_, err := db.Query(context.Background(), sql, userId, status, payAmount)
 
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-        os.Exit(1)
-    }
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 func DeleteMember(userId string) {
-    sql := "DELETE FROM patreon_status WHERE patreon_id = $1;"
+	sql := "DELETE FROM patreon_status WHERE patreon_id = $1;"
 
-    db := getConnection()
-    defer closeConnection(db)
+	db := getConnection()
+	defer closeConnection(db)
 
-    _, err := db.Query(context.Background(), sql, userId)
+	_, err := db.Query(context.Background(), sql, userId)
 
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-        os.Exit(1)
-    }
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		os.Exit(1)
+	}
 }
-
-
