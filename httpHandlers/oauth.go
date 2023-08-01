@@ -38,6 +38,11 @@ func OauthAuthorize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	origin := r.Header.Get("Origin")
+
+	if origin == "" {
+		origin = "https://oengus.io"
+	}
+
 	allowedOrigins := strings.Split(os.Getenv("OENGUS_BASE"), ",")
 
 	if !arrayContains(allowedOrigins, origin) {
