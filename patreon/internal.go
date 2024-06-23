@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"oenugs-patreon/structs"
@@ -45,7 +45,7 @@ func RefreshToken(tokens structs.PatreonTokens) (structs.PatreonTokens, error) {
 		defer res.Body.Close()
 	}
 
-	body, readErr := ioutil.ReadAll(res.Body)
+	body, readErr := io.ReadAll(res.Body)
 	if readErr != nil {
 		log.Println(readErr)
 		return response, readErr
@@ -66,7 +66,10 @@ func RefreshToken(tokens structs.PatreonTokens) (structs.PatreonTokens, error) {
 	}
 
 	file, _ := json.MarshalIndent(response, "", " ")
-	_ = ioutil.WriteFile("/storage/oengus-patreon/patreon-credentials.json", file, 0644)
+
+	fmt.Println("Token updated: " + string(file))
+
+	_ = os.WriteFile("/storage/oengus-patreon/patreon-credentials.json", file, 0644)
 
 	return response, nil
 }
@@ -107,7 +110,7 @@ func FetchPatrons(tokens structs.PatreonTokens) (structs.PatreonMembersResponse,
 		return response, errors.New("StatusUnauthorized")
 	}
 
-	body, readErr := ioutil.ReadAll(res.Body)
+	body, readErr := io.ReadAll(res.Body)
 	if readErr != nil {
 		log.Print(readErr)
 		return response, readErr

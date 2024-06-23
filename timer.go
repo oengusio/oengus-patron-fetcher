@@ -1,104 +1,139 @@
 package main
 
 import (
-    "encoding/json"
-    "io/ioutil"
-    "log"
-    "oenugs-patreon/cache"
-    "oenugs-patreon/patreon"
-    "oenugs-patreon/structs"
-    "os"
-    "os/signal"
-    "time"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"oenugs-patreon/cache"
+	"oenugs-patreon/patreon"
+	"oenugs-patreon/sql"
+	"oenugs-patreon/structs"
+	"os"
+	"os/signal"
+	"strings"
+	"time"
 )
 
 func UpdatePatrons() {
-    log.Println("Updating patrons")
+	log.Println("Updating patrons")
 
-    patrons, err := patreon.FetchPatrons(cache.Tokens)
+	patrons, err := patreon.FetchPatrons(cache.Tokens)
 
-    // 401 response, refresh the tokens
-    if err != nil && err.Error() == "StatusUnauthorized" {
-        newTokens, refreshErr := patreon.RefreshToken(cache.Tokens)
+	// 401 response, refresh the tokens
+	if err != nil && err.Error() == "StatusUnauthorized" {
+		newTokens, refreshErr := patreon.RefreshToken(cache.Tokens)
 
-        if refreshErr != nil {
-            log.Println("Error while refreshing tokens", refreshErr.Error())
-            return
-        }
+		if refreshErr != nil {
+			log.Println("Error while refreshing tokens", refreshErr.Error())
+			return
+		}
 
-        cache.Tokens = newTokens
-        patrons, err = patreon.FetchPatrons(cache.Tokens)
-    }
+		cache.Tokens = newTokens
+		patrons, err = patreon.FetchPatrons(cache.Tokens)
+	}
 
-    if err != nil {
-        log.Println(err)
-        return
-    }
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
-    newCache := structs.PatronOutput{
-        Patrons: make([]structs.PatronDisplay, 0),
-    }
+	newCache := structs.PatronOutput{
+		Patrons: make([]structs.PatronDisplay, 0),
+	}
 
-    // for {key}, {value} := range {list}
-    for i, patron := range patrons.Data {
-        attr := patron.Attributes
+	// for {key}, {value} := range {list}
+	for i, patron := range patrons.Data {
+		attr := patron.Attributes
 
-        // is an active patron that pays $25 or more
-        if attr.PatronStatus == "active_patron" /*&& attr.WillPayAmountCents >= 2500*/ {
-            userId := patron.Relationships.User.Data.Id
-            imageUrl := patrons.Included[i].Attributes.ImageUrl
+		// is an active patron that pays $25 or more
+		if attr.PatronStatus == "active_patron" /*&& attr.WillPayAmountCents >= 2500*/ {
+			userId := patron.Relationships.User.Data.Id
+			imageUrl := patrons.Included[i].Attributes.ImageUrl
 
-            newCache.Patrons = append(newCache.Patrons, structs.PatronDisplay{
-                Id:       userId,
-                Name:     attr.FullName,
-                ImageUrl: imageUrl,
-            })
-        }
-    }
+			newCache.Patrons = append(newCache.Patrons, structs.PatronDisplay{
+				Id:       userId,
+				Name:     attr.FullName,
+				ImageUrl: imageUrl,
+			})
+		}
+	}
 
-    log.Println("Found", len(newCache.Patrons), "patrons")
+	go updatePatronsInDatabase(patrons.Data)
 
-    cache.PatronCache = newCache
+	log.Println("Found", len(newCache.Patrons), "patrons")
+
+	cache.PatronCache = newCache
 }
 
 func StartUpdatePatronTimer() {
-    go UpdatePatrons()
+	go UpdatePatrons()
 
-    // tick every 24 hours to update the patrons
-    ticker := time.NewTicker(24 * time.Hour)
+	// tick every 24 hours to update the patrons
+	ticker := time.NewTicker(24 * time.Hour)
 
-    sigint := make(chan os.Signal, 1)
-    signal.Notify(sigint, os.Interrupt)
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt)
 
-    go func() {
-        for {
-            select {
-            case <- ticker.C:
-                UpdatePatrons()
-            case <- sigint:
-                ticker.Stop()
-                return
-            }
-        }
-    }()
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				UpdatePatrons()
+			case <-sigint:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 }
 
 func LoadPatronCredentials() {
-    if _, err := os.Stat("/storage/oengus-patreon/patreon-credentials.json"); os.IsNotExist(err) {
-        // fetch credentials
-        log.Fatal("Failed to load credentials file at \"/storage/oengus-patreon/patreon-credentials.json\"")
-    }
+	if _, err := os.Stat("/storage/oengus-patreon/patreon-credentials.json"); os.IsNotExist(err) {
+		// fetch credentials
+		log.Fatal("Failed to load credentials file at \"/storage/oengus-patreon/patreon-credentials.json\"")
+	}
 
-    // Open our jsonFile
-    jsonFile, err := os.Open("/storage/oengus-patreon/patreon-credentials.json")
-    // if we os.Open returns an error then handle it
-    if err != nil {
-        log.Fatal(err)
-    }
+	// Open our jsonFile
+	jsonFile, err := os.Open("/storage/oengus-patreon/patreon-credentials.json")
+	// if we os.Open returns an error then handle it
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    defer jsonFile.Close()
+	defer jsonFile.Close()
 
-    byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 
-    json.Unmarshal(byteValue, &cache.Tokens)
+	json.Unmarshal(byteValue, &cache.Tokens)
+}
+
+func updatePatronsInDatabase(data []structs.PatreonMembersData) {
+	conn := sql.GetConnection()
+
+	defer sql.CloseConnection(conn)
+
+	for _, patron := range data {
+		attr := patron.Attributes
+
+		query := "INSERT INTO  patreon_status(patreon_id, status, pledge_amount) VALUES($1, $2, $3) " +
+			"ON CONFLICT (patreon_id) DO UPDATE SET status = $2, pledge_amount = $3;"
+
+		userId := patron.Relationships.User.Data.Id
+		status := strings.ToUpper(attr.PatronStatus)
+
+		if status == "" {
+			// ignore blank statuses
+			continue
+		}
+
+		payAmount := attr.WillPayAmountCents
+
+		_, err := conn.Query(context.Background(), query, userId, status, payAmount)
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		}
+	}
 }
