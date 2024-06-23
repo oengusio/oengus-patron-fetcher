@@ -60,11 +60,13 @@ func UpdatePatrons() {
 		}
 	}
 
-	go updatePatronsInDatabase(patrons.Data)
-
 	log.Println("Found", len(newCache.Patrons), "patrons")
 
 	cache.PatronCache = newCache
+
+	log.Println("Updating database")
+	updatePatronsInDatabase(patrons.Data)
+	log.Println("Database update complete")
 }
 
 func StartUpdatePatronTimer() {
