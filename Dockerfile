@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine AS builder
+FROM golang:1.22-alpine AS builder
 
 WORKDIR /oengus-patreon
 COPY go.mod go.sum ./
