@@ -124,13 +124,14 @@ func updatePatronsInDatabase(data []structs.PatreonMembersData) {
 
 		userId := patron.Relationships.User.Data.Id
 		status := strings.ToUpper(attr.PatronStatus)
+		payAmount := attr.WillPayAmountCents
+
+		log.Println(userId, "is an", status, "paying", payAmount, "cents")
 
 		if status == "" {
 			// ignore blank statuses
 			continue
 		}
-
-		payAmount := attr.WillPayAmountCents
 
 		_, err := conn.Query(context.Background(), query, userId, status, payAmount)
 
