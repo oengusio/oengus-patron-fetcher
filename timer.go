@@ -129,7 +129,8 @@ func updatePatronsInDatabase(data []structs.PatreonMembersData) {
 		log.Println(userId, "is an", status, "paying", payAmount, "cents")
 
 		if status == "" {
-			// ignore blank statuses
+			// Delete users with a blank status from the db
+			sql.DeleteMemberConn(userId, conn)
 			continue
 		}
 

@@ -56,10 +56,14 @@ func UpdateMember(userId string, status string, payAmount int) {
 }
 
 func DeleteMember(userId string) {
-	sql := "DELETE FROM patreon_status WHERE patreon_id = $1;"
-
 	db := GetConnection()
 	defer CloseConnection(db)
+
+	DeleteMemberConn(userId, db)
+}
+
+func DeleteMemberConn(userId string, db *pgx.Conn) {
+	sql := "DELETE FROM patreon_status WHERE patreon_id = $1;"
 
 	_, err := db.Query(context.Background(), sql, userId)
 
