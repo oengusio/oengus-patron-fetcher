@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/jackc/pgx/v4"
 	"io"
 	"log"
 	"oenugs-patreon/cache"
@@ -47,8 +48,8 @@ func UpdatePatrons() {
 	for i, patron := range patrons.Data {
 		attr := patron.Attributes
 
-		// is an active patron that pays $25 or more
-		if attr.PatronStatus == "active_patron" /*&& attr.WillPayAmountCents >= 2500*/ {
+		// is an active patron that pays $1 or more
+		if attr.PatronStatus == "active_patron" && attr.WillPayAmountCents >= 100 {
 			userId := patron.Relationships.User.Data.Id
 			imageUrl := patrons.Included[i].Attributes.ImageUrl
 
@@ -116,6 +117,8 @@ func updatePatronsInDatabase(data []structs.PatreonMembersData) {
 
 	defer sql.CloseConnection(conn)
 
+	batch := &pgx.Batch{}
+
 	for _, patron := range data {
 		attr := patron.Attributes
 
@@ -133,10 +136,24 @@ func updatePatronsInDatabase(data []structs.PatreonMembersData) {
 			continue
 		}
 
-		_, err := conn.Query(context.Background(), query, userId, status, payAmount)
+		batch.Queue(query, userId, status, payAmount)
+
+		//_, err := conn.Query(context.Background(), query, userId, status, payAmount)
+		//
+		//if err != nil {
+		//	fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		//}
+	}
+
+	br := conn.SendBatch(context.Background(), batch)
+
+	for range batch.Len() {
+		_, err := br.Exec()
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
 		}
 	}
+
+	defer br.Close()
 }
