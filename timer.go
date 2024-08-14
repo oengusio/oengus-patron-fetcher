@@ -48,8 +48,8 @@ func UpdatePatrons() {
 	for i, patron := range patrons.Data {
 		attr := patron.Attributes
 
-		// is an active patron that pays $1 or more
-		if attr.PatronStatus == "active_patron" && attr.WillPayAmountCents >= 100 {
+		// is an active patron that pays $3 or more
+		if attr.PatronStatus == "active_patron" && attr.WillPayAmountCents >= 300 {
 			userId := patron.Relationships.User.Data.Id
 			imageUrl := patrons.Included[i].Attributes.ImageUrl
 
