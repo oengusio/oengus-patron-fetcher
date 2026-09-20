@@ -19,3 +19,8 @@ services:
       - OENGUS_BASE=https://oengus.io
 volumes:
   credentials:
+    driver: local
+    driver_opts:
+      type: none
+      device: /coding/oengus/oengus-patreon-fetcher/volume
+      o: bind

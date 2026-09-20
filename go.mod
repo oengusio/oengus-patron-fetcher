@@ -1,7 +1,8 @@
 module oenugs-patreon
 
-go 1.22
+go 1.27
 
+// TODO: upgrade to v5 at some point
 require github.com/jackc/pgx/v4 v4.18.3
 
 require (

@@ -94,7 +94,7 @@ func addPledge(pledge structs.WebhookPledge) {
 	}
 
 	userId := pledge.Data.Relationships.User.Data.Id
-	payAmount := pledge.Data.Attributes.PledgeAmountCents
+	payAmount := pledge.Data.Attributes.WillPayAmountCents
 
 	go sql.InsertMember(userId, status, payAmount)
 }
@@ -108,7 +108,7 @@ func updatePledge(pledge structs.WebhookPledge) {
 	}
 
 	userId := pledge.Data.Relationships.User.Data.Id
-	payAmount := pledge.Data.Attributes.PledgeAmountCents
+	payAmount := pledge.Data.Attributes.WillPayAmountCents
 
 	go sql.UpdateMember(userId, status, payAmount)
 }
