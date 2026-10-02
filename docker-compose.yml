@@ -17,7 +17,7 @@ services:
       - PATREON_CLIENT_SECRET=
       - PATREON_WEBHOOK_SECRET=
       - OENGUS_BASE=https://oengus.io
-      - PISS_URL=http://localhost:9001/patreon/
+      #- PISS_URL=http://localhost:9001/patreon/
 
 volumes:
   credentials:

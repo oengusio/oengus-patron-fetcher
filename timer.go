@@ -55,14 +55,21 @@ func UpdatePatrons() {
 			userId := patron.Relationships.User.Data.Id
 			imageUrl := patrons.Included[i].Attributes.ImageUrl
 
-			pissImageUrl, _ := url.Parse(os.Getenv("PISS_URL"))
+			pissImageUrlStr := imageUrl
+			pissSetting := os.Getenv("PISS_URL")
 
-			pissImageUrl = pissImageUrl.JoinPath(url.PathEscape(imageUrl))
+			if pissSetting != "" {
+				pissImageUrl, _ := url.Parse(pissSetting)
+
+				pissImageUrl = pissImageUrl.JoinPath(url.PathEscape(imageUrl))
+
+				pissImageUrlStr = pissImageUrl.String()
+			}
 
 			newCache.Patrons = append(newCache.Patrons, structs.PatronDisplay{
 				Id:       userId,
 				Name:     attr.FullName,
-				ImageUrl: pissImageUrl.String(),
+				ImageUrl: pissImageUrlStr,
 			})
 		}
 	}
