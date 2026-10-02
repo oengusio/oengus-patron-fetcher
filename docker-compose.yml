@@ -17,10 +17,12 @@ services:
       - PATREON_CLIENT_SECRET=
       - PATREON_WEBHOOK_SECRET=
       - OENGUS_BASE=https://oengus.io
+      - PISS_URL=http://localhost:9001/patreon/
+
 volumes:
   credentials:
     driver: local
     driver_opts:
       type: none
-      device: /coding/oengus/oengus-patreon-fetcher/volume
+      device: /coding/oengus/oengus-patron-fetcher/volume
       o: bind

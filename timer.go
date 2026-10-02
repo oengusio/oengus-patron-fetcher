@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/jackc/pgx/v4"
 	"io"
 	"log"
+	"net/url"
 	"oenugs-patreon/cache"
 	"oenugs-patreon/patreon"
 	"oenugs-patreon/sql"
@@ -15,6 +15,8 @@ import (
 	"os/signal"
 	"strings"
 	"time"
+
+	"github.com/jackc/pgx/v4"
 )
 
 func UpdatePatrons() {
@@ -53,10 +55,14 @@ func UpdatePatrons() {
 			userId := patron.Relationships.User.Data.Id
 			imageUrl := patrons.Included[i].Attributes.ImageUrl
 
+			pissImageUrl, _ := url.Parse(os.Getenv("PISS_URL"))
+
+			pissImageUrl = pissImageUrl.JoinPath(url.PathEscape(imageUrl))
+
 			newCache.Patrons = append(newCache.Patrons, structs.PatronDisplay{
 				Id:       userId,
 				Name:     attr.FullName,
-				ImageUrl: imageUrl,
+				ImageUrl: pissImageUrl.String(),
 			})
 		}
 	}

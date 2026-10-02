@@ -4,7 +4,7 @@ A microservice that fetches the patrons from [oengus.io](https://oengus.io/)
 ## How to run on your computer
 
 ### Requirements
-- Go 1.15
+- Go 1.27
 - Docker
 
 ##### Docker (recommended)
